@@ -1,0 +1,73 @@
+---
+title: "DS202_lab3"
+author: "Jack Langenwalter"
+date: "9/27/2020"
+output: html_document
+---
+```{r}
+library('readxl')
+```
+
+```{r}
+dat <- readxl::read_xls('/Users/lang7715/Downloads/GSS.xls')
+```
+
+```{r}
+library('ggplot2')
+library('dplyr')
+dat<-rename(dat, Mar='Marital status', MaarAge='Age when first married', Age='Age of respondent', Edu='Highest year of school completed', Sex='Respondents sex', Party='Political party affiliation', Happy= 'General happiness', Sports= 'Membership in sports club')
+```
+
+```{r}
+dat$Edu <- as.numeric(dat$Edu, na.rm=TRUE)
+dat$Age <- as.numeric(dat$Age, na.rm=TRUE)
+mean(dat$Edu, na.rm=TRUE)
+```
+1. ## Strong Republicans on average have the higest mean years of education while don't know is the lowest by almost a year and a half.
+```{r}
+school <- aggregate(dat$Edu, list(dat$Party), mean, na.rm=TRUE)
+head(dat)
+school[order(school$x),]
+```
+2. 
+```{r}
+school1 <- aggregate(dat$Edu, list(dat$Party), median, na.rm=TRUE)
+HigherEdu <- filter(dat, Party == school1$Group.1 & Edu > school1$x)
+HigherEdu
+```
+3. ## No answer and not too happy both had the lowest rate of married responders in their categories. Both these categories had high numbers of divorces as well. Meanwhile not applicable and very happy both had the greatest number of marries responders in their categories. This shows that married tend to be the happiest while divorced or widowed are the least happy which makes sense.
+```{r}
+library('ggplot2')
+dat$count <- 1
+dat<- filter(dat, dat$Happy != "NA")
+ggplot(dat, aes(fill=Mar, y=count, x=Happy)) + geom_bar(position="fill", stat="identity")
+library(ggplot2)
+table(dat$Mar, dat$Happy)
+```
+4. ## There is some variation between each party but the outcomes remain the same. Very happy has the most married responders. While not too happy has the least amount of married responders and high numbers of divorced as compared to other categories. This shows that parties don't have a large impact on how marriage can affect happiness. While they may have some, the pattern in happiness remains the same.
+```{r}
+ggplot(dat, aes(fill=Mar, y=count, x=Happy)) + geom_bar(position="fill", stat="identity") + facet_wrap(~Party)
+a <- table(dat$Happy, dat$Party)
+b <- table(dat$Party, dat$Mar)
+a
+b
+```
+5. ## The highest mean years of education is for those who answered with no answer. Never married has on average about .4 more years of education than married. While seperated's average is more than 1 whole year below married and widowed is nearly two. The low years of education for widowed could imply the military is involved.
+```{r}
+ggplot(dat, aes(fill=Mar, y=count, x=Edu)) + geom_bar(position="fill", stat="identity")
+aggregate( Edu ~ Mar, dat, mean)
+```
+6. ## The chart shows that the younger you are the more education you tend to have on average. This shows how times have changed and the new normal path is a formal college education as compared to earlier years when it was normal to get a job out of high school or a training program out of high school instead of going to college. 
+```{r}
+ggplot(data=dat, mapping=aes(x=Age, y=Edu)) + 
+  stat_summary(fun.data=mean_sdl, geom="bar")
+aggregate(Age ~ Edu , dat, mean)
+```
+7. ## This chart shows the comparison between years of education and whether or not the responder has a gym membership. On average, having a gym membership shows that you have more years of education as compared to any of the other categories. While don't know shows you have the lowest by nearly 3 whole years. This shows that people with a higher education tend to care more about their helath.
+```{r}
+ggplot(data=dat, mapping=aes(x=Sports, y=Edu)) + 
+  stat_summary(fun.data=mean_sdl, geom="bar")
+aggregate(Edu ~ Sports , dat, mean)
+
+```
+
